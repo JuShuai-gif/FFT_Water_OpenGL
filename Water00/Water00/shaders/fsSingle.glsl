@@ -1,15 +1,17 @@
 #version 330
-
-in vec3 normal_vector;
 in vec3 light_vector;
 in vec3 halfway_vector;
-// in vec2 tex_coord;
+in vec2 uv;
 
-uniform sampler2D water;
+uniform sampler2D texNormal;
+uniform vec2 dudvMove;
+
 out vec4 fragColor;
 
 void main (void) {
 	//fragColor = vec4(1.0, 1.0, 1.0, 1.0);
+
+	vec3 normal_vector = texture(texNormal, mod(uv + dudvMove, 1.0)).rgb * 2.0 - 1.0;
 
 	vec3 normal1         = normalize(normal_vector);
 	vec3 light_vector1   = normalize(light_vector);

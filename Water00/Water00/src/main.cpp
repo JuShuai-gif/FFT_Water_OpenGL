@@ -77,6 +77,10 @@ int main(int argc, char* argv[]) {
 
     // ‰÷»æ—≠ª∑
     while (!glfwWindowShouldClose(window)) {
+
+        t = glfwGetTime();
+        std::cout << "t:" <<t<< std::endl;
+
         glClearColor(97 / 256.f, 175 / 256.f, 239 / 256.f, 1.0f);
 
         // view control
@@ -167,7 +171,7 @@ int main(int argc, char* argv[]) {
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        ocean::dudvMave += vec2(0.001, 0.001);
+        ocean::dudvMove += vec2(0.001, 0.001);
 
         // ±£¥Ê÷°
         if (saveTrigger) {
@@ -272,6 +276,7 @@ void computeMatricesFromInputs() {
     // vec3 rightDir = normalize(vec3(right.x, 0, right.z));
     vec3 forwardDir = normalize(direction);
     vec3 rightDir = normalize(right);
+    vec3 upDir = normalize(newUp);
 
     // Move forward
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
@@ -289,6 +294,16 @@ void computeMatricesFromInputs() {
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
         eyePoint -= rightDir * deltaTime * speed;
     }
+
+    // UP
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+        eyePoint += upDir * deltaTime * speed;
+    }
+    // Down
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        eyePoint -= upDir * deltaTime * speed;
+    }
+
     // dive
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS && !isDiving) {
         isDiving = true;

@@ -34,7 +34,7 @@ public:
 	const aiScene* scene;
 
 	static const float BASELINE;
-	static vec2 dudvMave;
+	static vec2 dudvMove;
 	// 存放顶点、UV、法线
 	vector<GLuint> vboVtxs, vboUvs, vboNmls;
 	vector<GLuint> ebos;

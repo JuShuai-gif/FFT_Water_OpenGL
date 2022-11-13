@@ -1,0 +1,8 @@
+﻿  main.cpp
+E:\研究生\复现工程\水体模拟\OpenGL\FFT_Water_OpenGL\Water00\Water00\Linking\include\FreeImage.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+E:\研究生\复现工程\水体模拟\OpenGL\FFT_Water_OpenGL\Water00\Water00\src\main.cpp(28,31): warning C4305: “初始化”: 从“double”到“float”截断
+E:\研究生\复现工程\水体模拟\OpenGL\FFT_Water_OpenGL\Water00\Water00\src\main.cpp(29,32): warning C4305: “初始化”: 从“double”到“float”截断
+E:\研究生\复现工程\水体模拟\OpenGL\FFT_Water_OpenGL\Water00\Water00\src\main.cpp(81,24): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+E:\研究生\复现工程\水体模拟\OpenGL\FFT_Water_OpenGL\Water00\Water00\src\main.cpp(240,27): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+E:\研究生\复现工程\水体模拟\OpenGL\FFT_Water_OpenGL\Water00\Water00\src\main.cpp(243,23): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+  Water00.vcxproj -> E:\研究生\复现工程\水体模拟\OpenGL\FFT_Water_OpenGL\Water00\x64\Debug\Water00.exe

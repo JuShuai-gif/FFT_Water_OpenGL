@@ -59,6 +59,7 @@ void main() {
   // this can significantly reduce artifacts due to the normal map at far place
   float nFrac = exp(0.075 * dist) - 1.0;
   vec3 warpN = vec3(0, 1.0, 0) * nFrac;
+
   vec3 N = texture(texNormal, mod(uv + dudvMove, 1.0)).rgb * 2.0 - 1.0;
 
   float pFrac = min(exp(0.03 * dist) - 1.0, 1.0);

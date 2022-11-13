@@ -2,7 +2,7 @@
 #include"ocean.h"
 
 const float ocean::BASELINE = 0.0f;
-vec2 ocean::dudvMave = vec2(0.0f, 0.0f);
+vec2 ocean::dudvMove = vec2(0.0f, 0.0f);
 
 //海洋的构造函数
 ocean::ocean(const int N, const float A, const vec2 w, const float length)
@@ -47,7 +47,7 @@ ocean::ocean(const int N, const float A, const vec2 w, const float length)
         }
     }
     // import water mesh
-    scene = importer.ReadFile("mesh/plane_20_100.obj", aiProcess_CalcTangentSpace);
+    scene = importer.ReadFile("mesh/plane_1_64.obj", aiProcess_CalcTangentSpace);
 
     initShader();
     initBuffers();
@@ -83,9 +83,9 @@ void ocean::initShader()
 
     //shader = buildShader("shaders/vsOcean.glsl", "shaders/fsOcean.glsl");
 
-    shader = buildShader("shaders/vsSingle.glsl", "shaders/fsSingle.glsl");
+    //shader = buildShader("shaders/vsSingle.glsl", "shaders/fsSingle.glsl");
 
-    //shader = buildShader("shaders/model_load.vs", "shaders/model_load.fs");
+    shader = buildShader("shaders/vsSingle.glsl", "shaders/fsSingle.glsl");
 }
 
 void ocean::initBuffers()
@@ -118,14 +118,11 @@ void ocean::initBuffers()
             aiVector3D& uv = mesh->mTextureCoords[0][j];
             aUvs[j * 2 + 0] = uv.x;
             aUvs[j * 2 + 1] = uv.y;
+
+            aiFace face = mesh->mFaces[i];
+            for (unsigned int j = 0; j < face.mNumIndices; ++j)
+                indices.push_back(face.mIndices[j]);
         }
-
-
-        aiFace face = mesh->mFaces[i];
-        for (unsigned int j = 0; j < face.mNumIndices; ++j)
-            indices.push_back(face.mIndices[j]);
-
-
         // vao
         GLuint vao;
         GLuint ebo;
@@ -160,9 +157,6 @@ void ocean::initBuffers()
         glEnableVertexAttribArray(1);
         vboUvs.push_back(vboUv);
 
-        // vbo for normal
-        
-        
         glBindBuffer(GL_ARRAY_BUFFER, vboNml);
         glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * numVtxs * 3, aNormals, GL_STATIC_DRAW);
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -191,7 +185,8 @@ void ocean::initTexture()
     // vsSingle   fsSingle
     if (false)
     {
-
+        setTexture(tboDisp, 11, "image/disp.png", FIF_PNG);
+        setTexture(tboNormal, 12, "image/normal.png", FIF_PNG);
     }
 
 }
@@ -204,6 +199,12 @@ void ocean::initUniform()
     uniM = myGetUniformLocation(shader, "M");
     uniV = myGetUniformLocation(shader, "V");
     uniP = myGetUniformLocation(shader, "P");
+
+    uniTexDisp = myGetUniformLocation(shader, "texDisp");
+    uniTexNormal = myGetUniformLocation(shader, "texNormal");
+
+    glUniform1i(uniTexDisp, 11);
+    glUniform1i(uniTexNormal, 12);
 
     // 下面是设置反射贴图、折射的uniform内容
     /*
@@ -230,11 +231,11 @@ void ocean::initUniform()
 
     // light
     //uniLightColor = myGetUniformLocation(shader, "lightColor");
-    uniLightPos = myGetUniformLocation(shader, "lightPos");
+    //uniLightPos = myGetUniformLocation(shader, "lightPos");
 
     // other
-    //uniDudvMove = myGetUniformLocation(shader, "dudvMove");
-    //uniEyePoint = myGetUniformLocation(shader, "eyePoint");
+    uniDudvMove = myGetUniformLocation(shader, "dudvMove");
+    uniEyePoint = myGetUniformLocation(shader, "eyePoint");
 }
 void ocean::initRefract()
 {
@@ -676,11 +677,11 @@ void ocean::render(float t, mat4 M, mat4 V, mat4 P, vec3 eyePoint, vec3 lightCol
     glUniformMatrix4fv(uniV, 1, GL_FALSE, value_ptr(V));
     glUniformMatrix4fv(uniP, 1, GL_FALSE, value_ptr(P));
 
-    //glUniform3fv(uniEyePoint, 1, value_ptr(eyePoint));
+    glUniform3fv(uniEyePoint, 1, value_ptr(eyePoint));
     //glUniform3fv(uniLightColor, 1, value_ptr(lightColor));
-    glUniform3fv(uniLightPos, 1, value_ptr(lightPos));
+    //glUniform3fv(uniLightPos, 1, value_ptr(lightPos));
 
-    //glUniform2fv(uniDudvMove, 1, value_ptr(dudvMave));
+    glUniform2fv(uniDudvMove, 1, value_ptr(dudvMove));
 
     // duplicated
     for (int j = 0; j < 1; j++) {
@@ -692,16 +693,13 @@ void ocean::render(float t, mat4 M, mat4 V, mat4 P, vec3 eyePoint, vec3 lightCol
             // on the other hand, (10.f, 2.5f, 10.f) gives a relatively calm ocean
             mat4 Model = translate(mat4(1.0f), vec3(2.0 * i, 0, -2.0 * j));
             glUniformMatrix4fv(uniM, 1, GL_FALSE, value_ptr(Model));
-
+            int numVtxs = scene->mMeshes[i]->mNumVertices;
+            //std::cout << "numVtxs:" << numVtxs << std::endl;
             for (size_t i = 0; i < scene->mNumMeshes; i++) {
-                int numVtxs = scene->mMeshes[i]->mNumVertices;
-
                 glBindVertexArray(vaos[i]);
                 //glDrawArrays(GL_PATCHES, 0, numVtxs);
-                glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
-                //glDrawArrays(GL_TRIANGLES, 0, numVtxs);
-
-
+                //glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
+                glDrawArrays(GL_TRIANGLES, 0, numVtxs);
             }
         } 
     }  
